@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Prueba App Supermercados</title>
+<style>
+body{font-family:Arial;margin:20px;}
+.card{border:1px solid #ccc;padding:10px;margin:10px;border-radius:5px;}
+img{max-width:80px;}
+.precio{color:green;font-weight:bold;}
+</style>
+</head>
+<body>
+
+<h1>Buscar producto</h1>
+<input type="text" id="txtBuscar" placeholder="Escribe un producto">
+<button onclick="buscar()">Buscar</button>
+
+<div id="resultados"></div>
+
+<script>
+function buscar(){
+    let q = document.getElementById("txtBuscar").value;
+    fetch('buscar.php?q=' + encodeURIComponent(q))
+    .then(res => res.json())
+    .then(data => {
+        let cont = document.getElementById("resultados");
+        cont.innerHTML = "";
+        data.forEach(p => {
+            let div = document.createElement("div");
+            div.className="card";
+            div.innerHTML=`<h3>${p.nombre}</h3>
+            <img src="${p.imagen_url}" alt="imagen">
+            <p>${p.descripcion}</p>
+            <ul>
+            ${p.opciones.map(o=>`<li>${o.supermercado}: <span class="precio">$${o.precio}</span></li>`).join('')}
+            </ul>`;
+            cont.appendChild(div);
+        });
+    });
+}
+</script>
+
+</body>
+</html>
