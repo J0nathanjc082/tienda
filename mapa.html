@@ -5,62 +5,94 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- Leaflet CSS y JS desde CDN -->
+    <!-- Leaflet CSS y JS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
+    <!-- Leaflet Routing Machine -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css" />
+    <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
+
     <style>
-        /* El mapa ocupa toda la pantalla */
-        #map { height: 100vh; width: 100%; }
+        html, body { height: 100%; margin: 0; padding: 0; }
+        #map { height: 100%; width: 100%; }
     </style>
 </head>
 <body>
-
 <div id="map"></div>
 
 <script>
     // Crear el mapa centrado en Soyapango
     var map = L.map('map').setView([13.693, -89.186], 13);
 
-    // Tiles de OpenStreetMap
+    // OpenStreetMap tiles
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
         attribution: '© OpenStreetMap'
     }).addTo(map);
 
-    // Lista de todas las sucursales con coordenadas aproximadas
+    // Lista de supermercados con coordenadas aproximadas
     var supermercados = [
-        // Super Selectos
-        {name: "Mega Selectos Soyapango", lat:13.698, lon:-89.178},
-        {name: "Plaza Mundo Soyapango", lat:13.694, lon:-89.179},
-        {name: "Los Ángeles", lat:13.692, lon:-89.182},
-        {name: "Boulevard Espíritu Santo", lat:13.689, lon:-89.187},
-        {name: "Unicentro", lat:13.690, lon:-89.180},
+        {name: "Super Selectos Mega Selectos Soyapango", lat:13.698, lon:-89.178},
+        {name: "Super Selectos Plaza Mundo Soyapango", lat:13.694, lon:-89.179},
+        {name: "Super Selectos Los Ángeles", lat:13.692, lon:-89.182},
+        {name: "Super Selectos Boulevard Espíritu Santo", lat:13.689, lon:-89.187},
+        {name: "Super Selectos Unicentro", lat:13.690, lon:-89.180},
 
-        // Maxi Despensa
         {name: "Maxi Despensa Soyapango", lat:13.695, lon:-89.180},
-        {name: "Paseo Venecia", lat:13.697, lon:-89.184},
-        {name: "San Bartolo", lat:13.693, lon:-89.185},
-        {name: "Boulevard del Ejército", lat:13.691, lon:-89.181},
-        {name: "Altavista", lat:13.688, lon:-89.183},
+        {name: "Maxi Despensa Paseo Venecia", lat:13.697, lon:-89.184},
+        {name: "Maxi Despensa San Bartolo", lat:13.693, lon:-89.185},
+        {name: "Maxi Despensa Boulevard del Ejército", lat:13.691, lon:-89.181},
+        {name: "Maxi Despensa Altavista", lat:13.688, lon:-89.183},
 
-        // Walmart
         {name: "Walmart Soyapango", lat:13.696, lon:-89.179},
 
-        // La Despensa de Don Juan
-        {name: "Unicentro", lat:13.690, lon:-89.180},
-        {name: "Altavista", lat:13.688, lon:-89.183},
-        {name: "San Bartolo", lat:13.693, lon:-89.185},
-        {name: "Boulevard del Ejército", lat:13.691, lon:-89.181},
-        {name: "Plaza Mundo", lat:13.694, lon:-89.179}
+        {name: "La Despensa de Don Juan Unicentro", lat:13.690, lon:-89.180},
+        {name: "La Despensa de Don Juan Altavista", lat:13.688, lon:-89.183},
+        {name: "La Despensa de Don Juan San Bartolo", lat:13.693, lon:-89.185},
+        {name: "La Despensa de Don Juan Boulevard del Ejército", lat:13.691, lon:-89.181},
+        {name: "La Despensa de Don Juan Plaza Mundo", lat:13.694, lon:-89.179}
     ];
 
-    // Añadir todos los marcadores al mapa
+    // Función para crear un marcador con "Cómo llegar"
     supermercados.forEach(function(s) {
-        L.marker([s.lat, s.lon]).addTo(map)
-            .bindPopup("<b>" + s.name + "</b>");
+        var marker = L.marker([s.lat, s.lon]).addTo(map)
+            .bindPopup("<b>" + s.name + "</b><br><button onclick='ruta("+s.lat+","+s.lon+")'>Cómo llegar</button>");
     });
+
+    var control = null;
+
+    function ruta(lat, lon) {
+        // Solicitar ubicación del usuario
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                var userLat = position.coords.latitude;
+                var userLon = position.coords.longitude;
+
+                // Eliminar ruta anterior
+                if (control != null) {
+                    map.removeControl(control);
+                }
+
+                // Crear nueva ruta
+                control = L.Routing.control({
+                    waypoints: [
+                        L.latLng(userLat, userLon),
+                        L.latLng(lat, lon)
+                    ],
+                    routeWhileDragging: false
+                }).addTo(map);
+
+            }, function(error) {
+                alert("No se pudo obtener tu ubicación.");
+            });
+        } else {
+            alert("Tu navegador no soporta geolocalización.");
+        }
+    }
 </script>
 
 </body>
 </html>
+
+
