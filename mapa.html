@@ -14,16 +14,36 @@
     <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
 
     <style>
-        html, body { height: 100%; margin: 0; padding: 0; }
+        html, body { height: 100%; margin: 0; padding: 0; font-family: Arial, sans-serif; }
         #map { height: 100%; width: 100%; }
+
+        .leaflet-routing-container { 
+            background: rgba(255,255,255,0.95); 
+            border-radius: 10px; 
+            font-size: 14px;
+        }
+
+        .popup-button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .popup-button:hover {
+            background-color: #0056b3;
+        }
     </style>
 </head>
 <body>
 <div id="map"></div>
 
 <script>
-    // Crear el mapa centrado en Soyapango
-    var map = L.map('map').setView([13.693, -89.186], 13);
+    // Crear el mapa
+    var map = L.map('map');
 
     // OpenStreetMap tiles
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -31,65 +51,82 @@
         attribution: '© OpenStreetMap'
     }).addTo(map);
 
-    // Lista de supermercados con coordenadas aproximadas
-    var supermercados = [
-        {name: "Super Selectos Mega Selectos Soyapango", lat:13.716677380370754, lon:-89.14278714547027},
-        {name: "Super Selectos Plaza Mundo Soyapango", lat:13.698730794141914, lon:-89.1494946198851},
-        {name: "Super Selectos Los Ángeles", lat:13.717933301606383, lon: -89.12720381164152},
-        
-
-        {name: "Maxi Despensa Paseo Venecia", lat:13.716791789393147 , lon:-89.14419823337727},
-        {name: "Maxi Despensa Boulevard del Ejército", lat:13.700427159320915 , lon:-89.16658395776592},
-     
-
-        {name: "Walmart Soyapango", lat:13.700693187277691, lon: -89.15064727570586},
-
-        {name: "La Despensa de Don Juan Unicentro", lat:13.715381855893808, lon:-89.14073833322776},
-       
-        
-        
-        
-    ];
-
-    // Función para crear un marcador con "Cómo llegar"
-    supermercados.forEach(function(s) {
-        var marker = L.marker([s.lat, s.lon]).addTo(map)
-            .bindPopup("<b>" + s.name + "</b><br><button onclick='ruta("+s.lat+","+s.lon+")'>Cómo llegar</button>");
-    });
-
+    var userMarker = null;
     var control = null;
 
-    function ruta(lat, lon) {
-        // Solicitar ubicación del usuario
+    // Definir iconos por cadena
+    var icons = {
+        "Super Selectos": L.icon({iconUrl: 'https://i.imgur.com/9GQp2WU.png', iconSize:[30,30]}),
+        "Maxi Despensa": L.icon({iconUrl: 'https://i.imgur.com/KVvQqf2.png', iconSize:[30,30]}),
+        "Walmart": L.icon({iconUrl: 'https://i.imgur.com/X7iWPSR.png', iconSize:[30,30]}),
+        "La Despensa de Don Juan": L.icon({iconUrl: 'https://i.imgur.com/6fojW0t.png', iconSize:[30,30]})
+    };
+
+    // Lista de supermercados con coordenadas exactas y cadena
+    var supermercados = [
+        {name: "Super Selectos Mega Selectos Soyapango", lat:13.716677380370754, lon:-89.14278714547027, chain:"Super Selectos"},
+        {name: "Super Selectos Plaza Mundo Soyapango", lat:13.698730794141914, lon:-89.1494946198851, chain:"Super Selectos"},
+        {name: "Super Selectos Los Ángeles", lat:13.717933301606383, lon:-89.12720381164152, chain:"Super Selectos"},
+        {name: "Maxi Despensa Paseo Venecia", lat:13.716791789393147 , lon:-89.14419823337727, chain:"Maxi Despensa"},
+        {name: "Maxi Despensa Boulevard del Ejército", lat:13.700427159320915 , lon:-89.16658395776592, chain:"Maxi Despensa"},
+        {name: "Walmart Soyapango", lat:13.700693187277691, lon: -89.15064727570586, chain:"Walmart"},
+        {name: "La Despensa de Don Juan Unicentro", lat:13.715381855893808, lon:-89.14073833322776, chain:"La Despensa de Don Juan"}
+    ];
+
+    // Crear marcadores con iconos y popups
+    supermercados.forEach(function(s) {
+        L.marker([s.lat, s.lon], {icon: icons[s.chain]}).addTo(map)
+            .bindPopup("<b>" + s.name + "</b><br><button class='popup-button' onclick='ruta("+s.lat+","+s.lon+")'>Cómo llegar</button>");
+    });
+
+    // Función para localizar usuario
+    function localizarUsuario() {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(function(position) {
                 var userLat = position.coords.latitude;
                 var userLon = position.coords.longitude;
 
-                // Eliminar ruta anterior
-                if (control != null) {
-                    map.removeControl(control);
-                }
+                if (userMarker) { map.removeLayer(userMarker); }
 
-                // Crear nueva ruta
-                control = L.Routing.control({
-                    waypoints: [
-                        L.latLng(userLat, userLon),
-                        L.latLng(lat, lon)
-                    ],
-                    routeWhileDragging: false
-                }).addTo(map);
+                userMarker = L.marker([userLat, userLon], {
+                    icon: L.icon({iconUrl:'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png', iconSize:[30,30]})
+                }).addTo(map)
+                  .bindPopup("<b>¡Aquí estás!</b>").openPopup();
+
+                // Ajustar vista para mostrar todas las sucursales y usuario
+                var group = new L.featureGroup(supermercados.map(s=>L.marker([s.lat,s.lon])).concat([userMarker]));
+                map.fitBounds(group.getBounds().pad(0.2));
 
             }, function(error) {
-                alert("No se pudo obtener tu ubicación.");
+                alert("No se pudo obtener tu ubicación. Activa el GPS.");
             });
         } else {
             alert("Tu navegador no soporta geolocalización.");
         }
     }
-</script>
 
+    // Función para trazar ruta
+    function ruta(lat, lon) {
+        if (!userMarker) { alert("Esperando ubicación del usuario..."); return; }
+
+        var userLat = userMarker.getLatLng().lat;
+        var userLon = userMarker.getLatLng().lng;
+
+        if (control != null) { map.removeControl(control); }
+
+        control = L.Routing.control({
+            waypoints: [
+                L.latLng(userLat, userLon),
+                L.latLng(lat, lon)
+            ],
+            routeWhileDragging: false,
+            showAlternatives: true,
+            lineOptions: {styles: [{color: 'blue', opacity:0.7, weight:5}]}
+        }).addTo(map);
+    }
+
+    // Al cargar
+    localizarUsuario();
+</script>
 </body>
 </html>
-
-
