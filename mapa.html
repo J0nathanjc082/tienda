@@ -43,60 +43,20 @@
 
     var userMarker = null;
 
-    // Definir iconos usando los links que me enviaste
-    var icons = {
-        "Super Selectos": L.icon({
-            iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/5/5b/Sssv.jpeg',
-            iconSize: [35, 35],
-            iconAnchor: [17, 35],
-            popupAnchor: [0, -30],
-            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-            shadowSize: [41, 41],
-            shadowAnchor: [12, 41]
-        }),
-        "Maxi Despensa": L.icon({
-            iconUrl: 'https://static.wikia.nocookie.net/logopedia/images/a/a3/MaxiDespensa.svg/revision/latest?cb=20250712083055&path-prefix=es',
-            iconSize: [35, 35],
-            iconAnchor: [17, 35],
-            popupAnchor: [0, -30],
-            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-            shadowSize: [41, 41],
-            shadowAnchor: [12, 41]
-        }),
-        "Walmart": L.icon({
-            iconUrl: 'https://tecoloco-web-prd.s3.eu-west-1.amazonaws.com/assets/stands/0t1uce2o.le0Walmart%20OK%202023.jpg',
-            iconSize: [35, 35],
-            iconAnchor: [17, 35],
-            popupAnchor: [0, -30],
-            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-            shadowSize: [41, 41],
-            shadowAnchor: [12, 41]
-        }),
-        "Despensa Familiar": L.icon({
-            iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/1/17/Logo_Despensa_Familiar.svg',
-            iconSize: [35, 35],
-            iconAnchor: [17, 35],
-            popupAnchor: [0, -30],
-            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-            shadowSize: [41, 41],
-            shadowAnchor: [12, 41]
-        })
-    };
-
     // Lista de supermercados
     var supermercados = [
-        {name: "Super Selectos Mega Selectos Soyapango", lat:13.716677380370754, lon:-89.14278714547027, chain:"Super Selectos"},
-        {name: "Super Selectos Plaza Mundo Soyapango", lat:13.698730794141914, lon:-89.1494946198851, chain:"Super Selectos"},
-        {name: "Super Selectos Los Ángeles", lat:13.717933301606383, lon:-89.12720381164152, chain:"Super Selectos"},
-        {name: "Maxi Despensa Paseo Venecia", lat:13.716791789393147 , lon:-89.14419823337727, chain:"Maxi Despensa"},
-        {name: "Maxi Despensa Boulevard del Ejército", lat:13.700427159320915 , lon:-89.16658395776592, chain:"Maxi Despensa"},
-        {name: "Walmart Soyapango", lat:13.700693187277691, lon: -89.15064727570586, chain:"Walmart"},
-        {name: "Despensa Familiar Unicentro", lat:13.715381855893808, lon:-89.14073833322776, chain:"Despensa Familiar"}
+        {name: "Super Selectos Mega Selectos Soyapango", lat:13.716677380370754, lon:-89.14278714547027},
+        {name: "Super Selectos Plaza Mundo Soyapango", lat:13.698730794141914, lon:-89.1494946198851},
+        {name: "Super Selectos Los Ángeles", lat:13.717933301606383, lon:-89.12720381164152},
+        {name: "Maxi Despensa Paseo Venecia", lat:13.716791789393147 , lon:-89.14419823337727},
+        {name: "Maxi Despensa Boulevard del Ejército", lat:13.700427159320915 , lon:-89.16658395776592},
+        {name: "Walmart Soyapango", lat:13.700693187277691, lon: -89.15064727570586},
+        {name: "Despensa Familiar Unicentro", lat:13.715381855893808, lon:-89.14073833322776}
     ];
 
-    // Crear marcadores
+    // Crear marcadores predeterminados
     supermercados.forEach(function(s) {
-        L.marker([s.lat, s.lon], {icon: icons[s.chain]}).addTo(map)
+        L.marker([s.lat, s.lon]).addTo(map)
             .bindPopup("<b>" + s.name + "</b><br><button class='popup-button'>¡Ir!</button>");
     });
 
@@ -106,12 +66,7 @@
             var userLat = position.coords.latitude;
             var userLon = position.coords.longitude;
 
-            userMarker = L.marker([userLat, userLon], {
-                icon: L.icon({
-                    iconUrl:'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-                    iconSize:[30,30]
-                })
-            }).addTo(map)
+            userMarker = L.marker([userLat, userLon]).addTo(map)
               .bindPopup("<b>¡Aquí estás!</b>").openPopup();
 
             // Ajustar vista
