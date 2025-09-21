@@ -9,19 +9,9 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
-    <!-- Leaflet Routing Machine -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css" />
-    <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
-
     <style>
         html, body { height: 100%; margin: 0; padding: 0; font-family: Arial, sans-serif; }
         #map { height: 100%; width: 100%; }
-
-        .leaflet-routing-container { 
-            background: rgba(255,255,255,0.95); 
-            border-radius: 10px; 
-            font-size: 14px;
-        }
 
         .popup-button {
             background-color: #007bff;
@@ -52,17 +42,48 @@
     }).addTo(map);
 
     var userMarker = null;
-    var control = null;
 
-    // Definir iconos por cadena
+    // Definir iconos usando los links que me enviaste
     var icons = {
-        "Super Selectos": L.icon({iconUrl: 'https://i.imgur.com/9GQp2WU.png', iconSize:[30,30]}),
-        "Maxi Despensa": L.icon({iconUrl: 'https://i.imgur.com/KVvQqf2.png', iconSize:[30,30]}),
-        "Walmart": L.icon({iconUrl: 'https://i.imgur.com/X7iWPSR.png', iconSize:[30,30]}),
-        "La Despensa de Don Juan": L.icon({iconUrl: 'https://i.imgur.com/6fojW0t.png', iconSize:[30,30]})
+        "Super Selectos": L.icon({
+            iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/5/5b/Sssv.jpeg',
+            iconSize: [35, 35],
+            iconAnchor: [17, 35],
+            popupAnchor: [0, -30],
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+            shadowSize: [41, 41],
+            shadowAnchor: [12, 41]
+        }),
+        "Maxi Despensa": L.icon({
+            iconUrl: 'https://static.wikia.nocookie.net/logopedia/images/a/a3/MaxiDespensa.svg/revision/latest?cb=20250712083055&path-prefix=es',
+            iconSize: [35, 35],
+            iconAnchor: [17, 35],
+            popupAnchor: [0, -30],
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+            shadowSize: [41, 41],
+            shadowAnchor: [12, 41]
+        }),
+        "Walmart": L.icon({
+            iconUrl: 'https://tecoloco-web-prd.s3.eu-west-1.amazonaws.com/assets/stands/0t1uce2o.le0Walmart%20OK%202023.jpg',
+            iconSize: [35, 35],
+            iconAnchor: [17, 35],
+            popupAnchor: [0, -30],
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+            shadowSize: [41, 41],
+            shadowAnchor: [12, 41]
+        }),
+        "Despensa Familiar": L.icon({
+            iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/1/17/Logo_Despensa_Familiar.svg',
+            iconSize: [35, 35],
+            iconAnchor: [17, 35],
+            popupAnchor: [0, -30],
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+            shadowSize: [41, 41],
+            shadowAnchor: [12, 41]
+        })
     };
 
-    // Lista de supermercados con coordenadas exactas y cadena
+    // Lista de supermercados
     var supermercados = [
         {name: "Super Selectos Mega Selectos Soyapango", lat:13.716677380370754, lon:-89.14278714547027, chain:"Super Selectos"},
         {name: "Super Selectos Plaza Mundo Soyapango", lat:13.698730794141914, lon:-89.1494946198851, chain:"Super Selectos"},
@@ -70,63 +91,40 @@
         {name: "Maxi Despensa Paseo Venecia", lat:13.716791789393147 , lon:-89.14419823337727, chain:"Maxi Despensa"},
         {name: "Maxi Despensa Boulevard del Ejército", lat:13.700427159320915 , lon:-89.16658395776592, chain:"Maxi Despensa"},
         {name: "Walmart Soyapango", lat:13.700693187277691, lon: -89.15064727570586, chain:"Walmart"},
-        {name: "La Despensa de Don Juan Unicentro", lat:13.715381855893808, lon:-89.14073833322776, chain:"La Despensa de Don Juan"}
+        {name: "Despensa Familiar Unicentro", lat:13.715381855893808, lon:-89.14073833322776, chain:"Despensa Familiar"}
     ];
 
-    // Crear marcadores con iconos y popups
+    // Crear marcadores
     supermercados.forEach(function(s) {
         L.marker([s.lat, s.lon], {icon: icons[s.chain]}).addTo(map)
-            .bindPopup("<b>" + s.name + "</b><br><button class='popup-button' onclick='ruta("+s.lat+","+s.lon+")'>Cómo llegar</button>");
+            .bindPopup("<b>" + s.name + "</b><br><button class='popup-button'>¡Ir!</button>");
     });
 
-    // Función para localizar usuario
-    function localizarUsuario() {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(function(position) {
-                var userLat = position.coords.latitude;
-                var userLon = position.coords.longitude;
+    // Localizar usuario
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+            var userLat = position.coords.latitude;
+            var userLon = position.coords.longitude;
 
-                if (userMarker) { map.removeLayer(userMarker); }
+            userMarker = L.marker([userLat, userLon], {
+                icon: L.icon({
+                    iconUrl:'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+                    iconSize:[30,30]
+                })
+            }).addTo(map)
+              .bindPopup("<b>¡Aquí estás!</b>").openPopup();
 
-                userMarker = L.marker([userLat, userLon], {
-                    icon: L.icon({iconUrl:'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png', iconSize:[30,30]})
-                }).addTo(map)
-                  .bindPopup("<b>¡Aquí estás!</b>").openPopup();
-
-                // Ajustar vista para mostrar todas las sucursales y usuario
-                var group = new L.featureGroup(supermercados.map(s=>L.marker([s.lat,s.lon])).concat([userMarker]));
-                map.fitBounds(group.getBounds().pad(0.2));
-
-            }, function(error) {
-                alert("No se pudo obtener tu ubicación. Activa el GPS.");
-            });
-        } else {
-            alert("Tu navegador no soporta geolocalización.");
-        }
+            // Ajustar vista
+            var group = new L.featureGroup(supermercados.map(s=>L.marker([s.lat,s.lon])).concat([userMarker]));
+            map.fitBounds(group.getBounds().pad(0.2));
+        }, function(error) {
+            alert("No se pudo obtener tu ubicación. Activa el GPS.");
+        });
+    } else {
+        alert("Tu navegador no soporta geolocalización.");
     }
 
-    // Función para trazar ruta
-    function ruta(lat, lon) {
-        if (!userMarker) { alert("Esperando ubicación del usuario..."); return; }
-
-        var userLat = userMarker.getLatLng().lat;
-        var userLon = userMarker.getLatLng().lng;
-
-        if (control != null) { map.removeControl(control); }
-
-        control = L.Routing.control({
-            waypoints: [
-                L.latLng(userLat, userLon),
-                L.latLng(lat, lon)
-            ],
-            routeWhileDragging: false,
-            showAlternatives: true,
-            lineOptions: {styles: [{color: 'blue', opacity:0.7, weight:5}]}
-        }).addTo(map);
-    }
-
-    // Al cargar
-    localizarUsuario();
 </script>
 </body>
 </html>
+
