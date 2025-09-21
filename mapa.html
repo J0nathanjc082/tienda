@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Supermercados Soyapango</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Leaflet CSS y JS desde CDN -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+    <style>
+        /* El mapa ocupa toda la pantalla */
+        #map { height: 100vh; width: 100%; }
+    </style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<script>
+    // Crear el mapa centrado en Soyapango
+    var map = L.map('map').setView([13.693, -89.186], 13);
+
+    // Tiles de OpenStreetMap
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+    // Lista de todas las sucursales con coordenadas aproximadas
+    var supermercados = [
+        // Super Selectos
+        {name: "Mega Selectos Soyapango", lat:13.698, lon:-89.178},
+        {name: "Plaza Mundo Soyapango", lat:13.694, lon:-89.179},
+        {name: "Los Ángeles", lat:13.692, lon:-89.182},
+        {name: "Boulevard Espíritu Santo", lat:13.689, lon:-89.187},
+        {name: "Unicentro", lat:13.690, lon:-89.180},
+
+        // Maxi Despensa
+        {name: "Maxi Despensa Soyapango", lat:13.695, lon:-89.180},
+        {name: "Paseo Venecia", lat:13.697, lon:-89.184},
+        {name: "San Bartolo", lat:13.693, lon:-89.185},
+        {name: "Boulevard del Ejército", lat:13.691, lon:-89.181},
+        {name: "Altavista", lat:13.688, lon:-89.183},
+
+        // Walmart
+        {name: "Walmart Soyapango", lat:13.696, lon:-89.179},
+
+        // La Despensa de Don Juan
+        {name: "Unicentro", lat:13.690, lon:-89.180},
+        {name: "Altavista", lat:13.688, lon:-89.183},
+        {name: "San Bartolo", lat:13.693, lon:-89.185},
+        {name: "Boulevard del Ejército", lat:13.691, lon:-89.181},
+        {name: "Plaza Mundo", lat:13.694, lon:-89.179}
+    ];
+
+    // Añadir todos los marcadores al mapa
+    supermercados.forEach(function(s) {
+        L.marker([s.lat, s.lon]).addTo(map)
+            .bindPopup("<b>" + s.name + "</b>");
+    });
+</script>
+
+</body>
+</html>
