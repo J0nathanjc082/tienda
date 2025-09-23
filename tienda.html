@@ -1,0 +1,17 @@
+<script>
+async function fetchProduct(code) {
+  try {
+    const resp = await fetch("https://web-production-ffd6.up.railway.app/productos.php?barcode=" + code);
+    const data = await resp.json();
+
+    document.getElementById("prodImg").src = data.image || "";
+    document.getElementById("prodName").textContent = data.name || "Sin nombre";
+    document.getElementById("prodPrice").textContent = data.price || "No disponible";
+    document.getElementById("prodCode").textContent = code;
+    document.getElementById("result").style.display = "flex";
+  } catch (err) {
+    alert("Error al obtener datos del producto");
+    console.error(err);
+  }
+}
+</script>
